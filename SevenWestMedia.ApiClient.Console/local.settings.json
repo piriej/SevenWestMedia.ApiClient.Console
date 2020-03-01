@@ -1,0 +1,8 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+        "Config:BaseAddress": "https://f43qgubfhf.execute-api.ap-southeast-2.amazonaws.com/",
+        "Config:TestEndpoint": "sampletest",
+        "Config:RequestTimeout": 1000
+    }
+}

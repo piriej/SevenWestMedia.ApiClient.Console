@@ -1,12 +1,13 @@
-﻿using System;
-
-namespace SevenWestMedia.ApiClient.Console
+﻿namespace SevenWestMedia.ApiClient.Console
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var startup = new Startup();
+            startup
+                .ConfigureServices()
+                .Configure();
         }
     }
 }
