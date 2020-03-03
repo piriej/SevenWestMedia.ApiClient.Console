@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using SevenWestMedia.ApiClient.Library.Configuration;
 
 namespace SevenWestMedia.ApiClient.Library.ServiceAdapter
@@ -20,7 +21,7 @@ namespace SevenWestMedia.ApiClient.Library.ServiceAdapter
         private static void AddOptions(IServiceCollection services)
         {
             services.AddOptions<Config>()
-                .Configure<IConfiguration>((settings, configuration) => { configuration.GetSection("Config").Bind(settings); });
+                .Configure<IConfiguration>((settings, configuration) => { configuration.GetSection("Values").Bind(settings); });
         }
 
         private static void AddHttpClient(IServiceCollection services)
@@ -31,7 +32,7 @@ namespace SevenWestMedia.ApiClient.Library.ServiceAdapter
             // Delay recycling clients to every 5 mins (So every 5 mins guaranteed to hit DNS)
             services.AddHttpClient<ISampleTestService, SampleTestService>((serviceCollection, client) =>
                 {
-                    var config = serviceCollection.GetService<Config>();
+                    var config = serviceCollection.GetService<IOptions<Config>>().Value;
                     client.BaseAddress = new Uri(config.BaseAddress);
                 })
                 .AddPolicyHandler(Policies.RetryPolicy())

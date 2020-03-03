@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using SevenWestMedia.ApiClient.Library.Configuration;
 using SevenWestMedia.ApiClient.Library.Models;
@@ -16,11 +17,11 @@ namespace SevenWestMedia.ApiClient.Library.ServiceAdapter
         private readonly string _serviceEndpoint;
         private readonly int _requestTimeout;
 
-        public SampleTestService(HttpClient httpClient, Config config)
+        public SampleTestService(HttpClient httpClient, IOptions<Config> config)
         {
             _httpClient = httpClient;
-            _serviceEndpoint = config.TestEndpoint;
-            _requestTimeout = config.RequestTimeout;
+            _serviceEndpoint = config.Value.TestEndpoint;
+            _requestTimeout = config.Value.RequestTimeout;
         }
 
         public async Task<IEnumerable<T>> DeserialiseStream<T>()

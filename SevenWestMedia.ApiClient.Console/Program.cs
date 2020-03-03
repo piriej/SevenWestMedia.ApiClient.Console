@@ -2,7 +2,7 @@
 using SevenWestMedia.ApiClient.Library.Models;
 using SevenWestMedia.ApiClient.Library.ServiceAdapter;
 using Microsoft.Extensions.DependencyInjection;
-    using System;
+using System;
 
 namespace SevenWestMedia.ApiClient.Console
 {
@@ -16,9 +16,14 @@ namespace SevenWestMedia.ApiClient.Console
 
             var aggregator = serviceProvider.GetService<IAggregateServices<Person, PeopleViewModel>>();
             var viewModelMapper = serviceProvider.GetService<IMapper<Person, PeopleViewModel>>();
-            
-            var viewModel = aggregator.AggregateOperation(viewModelMapper.Map);
+
+            var viewModel = aggregator.AggregateOperation(viewModelMapper.Map).Result;
+
+            System.Console.WriteLine();
+            System.Console.BackgroundColor = ConsoleColor.Blue;
+            System.Console.ForegroundColor = ConsoleColor.Yellow;
             System.Console.WriteLine(viewModel);
+            System.Console.ResetColor();
             System.Console.ReadLine();
         }
     }

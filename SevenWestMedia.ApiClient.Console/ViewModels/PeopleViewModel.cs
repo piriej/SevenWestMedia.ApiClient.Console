@@ -15,13 +15,22 @@ namespace SevenWestMedia.ApiClient.Console.ViewModels
         public List<string> FirstNames { get; set; } = new List<string>();
         public SortedList<int, GendersViewModel> GendersByAge { get; set; } = new SortedList<int, GendersViewModel>();
 
+        // View
         public override string ToString()
         {
-            var gendersByAge = string.Join(Environment.NewLine, GendersByAge.Select(g => g.ToString()));
+            var gendersByAge = Environment.NewLine + string.Join(Environment.NewLine, GendersByAge.Select(g => $"[ {g.Value} ]"));
+            var firstNames = string.Join(", ", FirstNames);
+
+            var fullNameText = Id == -1
+                ? "There was no full name for the given Id." 
+                : $"Full Name where id={Id}: {FullName}";
+            var firstNamesText = Age == -1
+                ? "There were no first names to display for the given age"
+                : $"First Names where Age={Age}: {firstNames} ";
 
             var builder = new StringBuilder()
-                .AppendLine($"Full Name where id={Id}: {FullName} ")
-                .AppendLine($"First Names where Age={Age}: {FirstNames} ")
+                .AppendLine(fullNameText)
+                .AppendLine(firstNamesText)
                 .AppendLine($"Genders By Age: {gendersByAge} ");
 
             return builder.ToString();

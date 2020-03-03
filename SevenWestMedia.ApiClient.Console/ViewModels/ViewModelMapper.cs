@@ -41,6 +41,8 @@ namespace SevenWestMedia.ApiClient.Console.ViewModels
         {
             var gender = person.Gender.ToUpper();
 
+            gendersViewModel.Age = person.Age;
+
             if (gendersViewModel.Genders.TryAdd(gender, 1))
                 return;
 

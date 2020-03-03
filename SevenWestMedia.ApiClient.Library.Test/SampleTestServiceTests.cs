@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Net;
 using FluentAssertions;
+using Microsoft.Extensions.Options;
 using SevenWestMedia.ApiClient.Console.ViewModels;
 using SevenWestMedia.ApiClient.Library.Configuration;
 using SevenWestMedia.ApiClient.Library.Models;
@@ -13,7 +14,7 @@ namespace SevenWestMedia.ApiClient.Library.Test
     {
         public void CanDeserializeARecordFromTheService(
             HttpClientFixtureBuilder<Person> httpClientFixtureBuilder,
-            Config config)
+            IOptions<Config> config)
         {
             const string firstName = "Jeff";
 
@@ -32,7 +33,7 @@ namespace SevenWestMedia.ApiClient.Library.Test
         public void ServiceAggregatorCorrectlyAggregatesNamesForId42(
             HttpClientFixtureBuilder<Person> httpClientFixtureBuilder,
             IMapper<Person, PeopleViewModel> viewModelMapper,
-            Config config)
+            IOptions<Config> config)
         {
             var httpClient = httpClientFixtureBuilder
                 .WithStatusCode(HttpStatusCode.OK)
@@ -54,7 +55,7 @@ namespace SevenWestMedia.ApiClient.Library.Test
         public void ServiceAggregatorCorrectlyAggregatesFirstNamesAged23(
             HttpClientFixtureBuilder<Person> httpClientFixtureBuilder,
             IMapper<Person, PeopleViewModel> viewModelMapper,
-            Config config)
+            IOptions<Config> config)
         {
             var httpClient = httpClientFixtureBuilder
                 .WithStatusCode(HttpStatusCode.OK)
@@ -75,7 +76,7 @@ namespace SevenWestMedia.ApiClient.Library.Test
         public void ServiceAggregatorCorrectlyAggregatesNumberOfGendersPerAge(
             HttpClientFixtureBuilder<Person> httpClientFixtureBuilder,
             IMapper<Person, PeopleViewModel> viewModelMapper,
-            Config config)
+            IOptions<Config> config)
         {
             var peopleMock = PeopleMock.WithMultipleGendersAndAges();
 

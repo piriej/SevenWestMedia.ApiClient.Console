@@ -48,7 +48,7 @@ namespace SevenWestMedia.ApiClient.Console
 
             Configuration = builder.Build();
 
-            services.AddSingleton(Configuration);
+            services.AddSingleton<IConfiguration>(Configuration);
         }
     }
 }

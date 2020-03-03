@@ -24,10 +24,10 @@ namespace SevenWestMedia.ApiClient.Console.ViewModels
             {
                 var key = GenderMap(gender.Key);
 
-                builder.Append($", {key}: ${gender.Value}");
+                builder.Append($", {key}: {gender.Value}");
             }
 
-            builder.AppendLine();
+            //builder.AppendLine();
             return builder.ToString();
         }
     }

@@ -2,8 +2,10 @@
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 using SevenWestMedia.ApiClient.Console.ViewModels;
+using SevenWestMedia.ApiClient.Library.Configuration;
 using SevenWestMedia.ApiClient.Library.Models;
 using SevenWestMedia.ApiClient.Library.ServiceAdapter;
 
@@ -36,13 +38,10 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
 
         private static void AddMockConfig(ServiceCollection services)
         {
-            var configRoot = new Mock<IConfigurationRoot>();
-
-            configRoot
-                .SetupGet(x => x[It.IsAny<string>()])
-                .Returns("AnyResult");
-
-            services.AddSingleton(typeof(IConfigurationRoot), configRoot);
+            var config = new Config();
+            var mock = new Mock<IOptions<Config>>();
+            mock.Setup(c => c.Value).Returns(config);
+            services.AddSingleton(mock.Object);
         }
         
     }
