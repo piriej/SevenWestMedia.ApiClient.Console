@@ -10,14 +10,11 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
 {
     public class InputParameterSource : ParameterSource
     {
-        private Fixture _fixture
-            ;
         public ServiceProvider Services { get; set; }
 
         public InputParameterSource(ServiceProvider services)
         {
             Services = services;
-            _fixture = new Fixture();
         }
 
         public IEnumerable<object[]> GetParameters(MethodInfo method)
@@ -28,6 +25,7 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
 
         private IEnumerable<object[]> GetParametersFromContainerOrFixture(MethodInfo method)
         {
+            var fixture = new Fixture();
             var parameters = method.GetParameters();
             var objects = new object[parameters.Length];
 
@@ -37,7 +35,7 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
                 var service = Services.GetService(parameterInfo.ParameterType);
                 if (service == null && !parameterInfo.ParameterType.IsInterface)
                 {
-                    var context = new SpecimenContext(_fixture);
+                    var context = new SpecimenContext(fixture);
                     service = context.Resolve(parameterInfo.ParameterType);
                 }
 

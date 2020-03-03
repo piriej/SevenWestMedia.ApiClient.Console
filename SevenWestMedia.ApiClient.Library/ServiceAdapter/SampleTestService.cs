@@ -23,7 +23,8 @@ namespace SevenWestMedia.ApiClient.Library.ServiceAdapter
             _requestTimeout = config.RequestTimeout;
         }
 
-        public async Task<IEnumerable<T>> DeserialiseStream<T>() where T : IModel, new()
+        public async Task<IEnumerable<T>> DeserialiseStream<T>()
+            where T : IModel, new()
         {
             var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(_requestTimeout));
             using (var request = new HttpRequestMessage(HttpMethod.Get, _serviceEndpoint))
@@ -32,11 +33,20 @@ namespace SevenWestMedia.ApiClient.Library.ServiceAdapter
                 var stream = await response.Content.ReadAsStreamAsync();
 
                 if (response.IsSuccessStatusCode)
-                    return DeserialiseStream<List<T>>(stream);
-
+                    return DeserialiseStream<IEnumerable<T>>(stream);
             }
+
             return new List<T>();
         }
+
+//        public IObservable<IEnumerable<T>> ToObservable<T>()
+//            where T : IModel, new()
+//        {
+//            return DeserialiseStream<T>()
+//                    .ToObservable()
+//                    .SelectMany(results => results)
+//                    .Select(x => x);
+//        }
 
         private static T DeserialiseStream<T>(Stream stream)
         {

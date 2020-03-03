@@ -12,9 +12,11 @@ namespace SevenWestMedia.ApiClient.Library.ServiceAdapter
             AddOptions(services);
             AddHttpClient(services);
 
+            services.AddScoped(typeof(IAggregateServices<,>), typeof(ServiceAggregator<,>));
+
             return services;
         }
-
+       
         private static void AddOptions(IServiceCollection services)
         {
             services.AddOptions<Config>()

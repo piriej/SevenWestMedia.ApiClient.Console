@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
@@ -18,7 +19,7 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
         where T : IModel
     {
         private HttpStatusCode _statusCode = HttpStatusCode.OK;
-        private List<T> _models;
+        public List<T> HttpBodyModel { get; private set; }
         private readonly Fixture _fixture;
         private HttpClient _httpClient;
 
@@ -43,7 +44,7 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
 
         public HttpClientFixtureBuilder<T> WithModel(List<T> models)
         {
-            _models = models;
+            HttpBodyModel = models;
             return this;
         }
 
@@ -66,19 +67,37 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
 
             models.Add(model);
 
-            _models = models;
+            HttpBodyModel = models;
+            return this;
+        }
+
+        public HttpClientFixtureBuilder<T> WithAllModel(Expression<Func<ICustomizationComposer<T>, IPostprocessComposer<T>>> expression, int count = 1)
+        {
+            _fixture.Register(() =>
+            {
+                var customizationComposer = _fixture
+                    .Build<T>();
+
+                var func = expression.Compile();
+                var composer = func(customizationComposer);
+
+                return composer.Create();
+            });
+
+            HttpBodyModel = _fixture.CreateMany<T>().ToList();
+
             return this;
         }
 
         public HttpClientFixtureBuilder<T> WithGet()
         {
-            WithGet(_statusCode, _models);
+            WithGet(_statusCode, HttpBodyModel);
             return this;
         }
 
         public HttpClientFixtureBuilder<T> WithGet(HttpStatusCode statusCode, List<T> models)
         {
-            if(models == null)
+            if (models == null)
                 throw new Exception("Model must be defined prior to call to WithGet");
 
             var json = JsonConvert.SerializeObject(models);

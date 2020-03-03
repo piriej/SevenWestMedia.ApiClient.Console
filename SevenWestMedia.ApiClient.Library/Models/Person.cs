@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
-using SevenWestMedia.ApiClient.Library.Models;
 
-namespace SevenWestMedia.ApiClient.Library
+namespace SevenWestMedia.ApiClient.Library.Models
 {
     public class Person : IModel
     {
@@ -16,5 +15,8 @@ namespace SevenWestMedia.ApiClient.Library
 
         [JsonProperty(PropertyName = "age")]
         public int Age { get; set; }
+
+        [JsonProperty(PropertyName = "gender")]
+        public string Gender { get; set; }
     }
 }

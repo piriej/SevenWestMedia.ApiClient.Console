@@ -24,6 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\SevenWestMedia.ApiClient.Console\SevenWestMedia.ApiClient.Console.csproj" />
 	  <ProjectReference Include="..\SevenWestMedia.ApiClient.Library\SevenWestMedia.ApiClient.Library.csproj" />
 	</ItemGroup>
 
