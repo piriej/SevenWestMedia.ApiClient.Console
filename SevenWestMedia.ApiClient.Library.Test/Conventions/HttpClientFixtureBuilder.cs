@@ -18,10 +18,11 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
     public class HttpClientFixtureBuilder<T> : IBuildFixtures<T>
         where T : IModel
     {
-        private HttpStatusCode _statusCode = HttpStatusCode.OK;
+        private List<HttpStatusCode> _statusCode = new List<HttpStatusCode>();
         public List<T> HttpBodyModel { get; private set; }
         private readonly Fixture _fixture;
         private HttpClient _httpClient;
+        public Mock<HttpMessageHandler> HandlerMock { get; private set; }
 
         public HttpClientFixtureBuilder()
         {
@@ -38,9 +39,16 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
 
         public HttpClientFixtureBuilder<T> WithStatusCode(HttpStatusCode statusCode)
         {
-            _statusCode = statusCode;
+            _statusCode.Add(statusCode);
             return this;
         }
+
+        public HttpClientFixtureBuilder<T> WithStatusCode(List<HttpStatusCode> statusCodes)
+        {
+            _statusCode = statusCodes;
+            return this;
+        }
+
 
         public HttpClientFixtureBuilder<T> WithModel(List<T> models)
         {
@@ -48,7 +56,8 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
             return this;
         }
 
-        public HttpClientFixtureBuilder<T> WithModel(Expression<Func<ICustomizationComposer<T>, IPostprocessComposer<T>>> expression, int count = 1)
+        public HttpClientFixtureBuilder<T> WithModel(
+            Expression<Func<ICustomizationComposer<T>, IPostprocessComposer<T>>> expression, int count = 1)
         {
             var customizationComposer = _fixture
                 .Build<T>();
@@ -71,7 +80,8 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
             return this;
         }
 
-        public HttpClientFixtureBuilder<T> WithAllModel(Expression<Func<ICustomizationComposer<T>, IPostprocessComposer<T>>> expression, int count = 1)
+        public HttpClientFixtureBuilder<T> WithAllModel(
+            Expression<Func<ICustomizationComposer<T>, IPostprocessComposer<T>>> expression, int count = 1)
         {
             _fixture.Register(() =>
             {
@@ -95,15 +105,17 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
             return this;
         }
 
-        public HttpClientFixtureBuilder<T> WithGet(HttpStatusCode statusCode, List<T> models)
+        public HttpClientFixtureBuilder<T> WithGet(List<HttpStatusCode> statusCode, List<T> models)
         {
             if (models == null)
                 throw new Exception("Model must be defined prior to call to WithGet");
 
             var json = JsonConvert.SerializeObject(models);
 
-            var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
-            handlerMock
+            var queue = new Queue<HttpStatusCode>(statusCode);
+
+            HandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            HandlerMock
                 .Protected()
                 .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
@@ -112,17 +124,27 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
                 )
                 .ReturnsAsync(new HttpResponseMessage()
                 {
-                    StatusCode = statusCode,
+                    StatusCode = queue.SafeDequeue(),
                     Content = new StringContent(json),
                 })
                 .Verifiable();
 
-            _httpClient = new HttpClient(handlerMock.Object)
+            _httpClient = new HttpClient(HandlerMock.Object)
             {
                 BaseAddress = new Uri("http://fakeTestUri.com/"),
             };
 
             return this;
+        }
+    }
+
+    public static class QueueExtensions
+    {
+        public static HttpStatusCode SafeDequeue(this Queue<HttpStatusCode> queue)
+        {
+            if (queue.Count == 1)
+                return queue.Peek();
+            return queue.Dequeue();
         }
     }
 }

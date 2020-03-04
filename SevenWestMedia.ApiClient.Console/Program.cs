@@ -16,8 +16,20 @@ namespace SevenWestMedia.ApiClient.Console
 
             var aggregator = serviceProvider.GetService<IAggregateServices<Person, PeopleViewModel>>();
             var viewModelMapper = serviceProvider.GetService<IMapper<Person, PeopleViewModel>>();
+            PeopleViewModel viewModel = new PeopleViewModel();
 
-            var viewModel = aggregator.AggregateOperation(viewModelMapper.Map).Result;
+            try
+            {
+                // For a scenario where the console does more than one task, This would be best execute as an observable
+                // for this simple scenario the thread result is used.
+                viewModel = aggregator.AggregateOperation(viewModelMapper.Map).Result;
+            }
+            catch (Exception ex)
+            {
+                System.Console.ForegroundColor = ConsoleColor.Red;
+                System.Console.WriteLine("A policy has been breached, please try again later.");
+                System.Console.ResetColor();
+            }
 
             System.Console.WriteLine();
             System.Console.BackgroundColor = ConsoleColor.Blue;

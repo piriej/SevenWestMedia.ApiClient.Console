@@ -17,7 +17,7 @@ namespace SevenWestMedia.ApiClient.Library.ServiceAdapter
 
             return services;
         }
-       
+
         private static void AddOptions(IServiceCollection services)
         {
             services.AddOptions<Config>()
@@ -26,6 +26,9 @@ namespace SevenWestMedia.ApiClient.Library.ServiceAdapter
 
         private static void AddHttpClient(IServiceCollection services)
         {
+            //            var policies = new PolicyRepository();
+            //            services.AddSingleton<IPolicyRepository>(policies);
+
             // Pool HTTP connections with HttpClientFactory to prevent thread pool starvation,
             // Register SampleTestService as a Typed Service Agent to use HttpClient.
             // Ensure that intermittent issues are handled with a retry policy, and spamming prevented with a circuit breaker.
@@ -33,10 +36,10 @@ namespace SevenWestMedia.ApiClient.Library.ServiceAdapter
             services.AddHttpClient<ISampleTestService, SampleTestService>((serviceCollection, client) =>
                 {
                     var config = serviceCollection.GetService<IOptions<Config>>().Value;
-                    client.BaseAddress = new Uri(config.BaseAddress);
+                    client.BaseAddress = new Uri(config.BaseAddress );
                 })
-                .AddPolicyHandler(Policies.RetryPolicy())
-                .AddPolicyHandler(Policies.CircuitBreakerPolicy())
+                .AddPolicyHandler(PolicyRepository.RetryPolicy())
+                .AddPolicyHandler(PolicyRepository.CircuitBreakerPolicy())
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
         }
     }

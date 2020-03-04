@@ -5,7 +5,7 @@ using Polly.Extensions.Http;
 
 namespace SevenWestMedia.ApiClient.Library.Configuration
 {
-    public class Policies
+    public class PolicyRepository
     {
         /// <summary>
         /// On 5XX / 408 / 404 wait and retry 4 times with an asymptotic delay.
@@ -28,4 +28,6 @@ namespace SevenWestMedia.ApiClient.Library.Configuration
                 .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
         }
     }
+
+   
 }

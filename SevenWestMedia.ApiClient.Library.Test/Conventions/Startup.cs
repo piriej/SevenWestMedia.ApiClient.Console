@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Moq;
+using Moq.Protected;
 using SevenWestMedia.ApiClient.Console.ViewModels;
 using SevenWestMedia.ApiClient.Library.Configuration;
 using SevenWestMedia.ApiClient.Library.Models;
@@ -16,11 +20,16 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
         public static ServiceProvider Setup()
         {
             var serviceCollection = new ServiceCollection();
-            serviceCollection.AddSwmApiClientLibrary();
-            ScanFixtureBuilders(serviceCollection);
             AddMockConfig(serviceCollection);
+            serviceCollection
+                .AddTransient<IAggregateServices<Person, PeopleViewModel>, ServiceAggregator<Person, PeopleViewModel>>();
+            serviceCollection.AddTransient<ISampleTestService, SampleTestService>();
+            ScanFixtureBuilders(serviceCollection);
+            
+            AddPolicyRegistry(serviceCollection);
             serviceCollection.AddTransient(typeof(IMapper<Person, PeopleViewModel>), typeof(ViewModelMapper));
-            return serviceCollection.BuildServiceProvider();
+            var x = serviceCollection.BuildServiceProvider();
+            return x;
         }
 
         private static void ScanFixtureBuilders(ServiceCollection serviceCollection)
@@ -43,6 +52,38 @@ namespace SevenWestMedia.ApiClient.Library.Test.Conventions
             mock.Setup(c => c.Value).Returns(config);
             services.AddSingleton(mock.Object);
         }
-        
+
+        private static void AddPolicyRegistry(ServiceCollection services)
+        {
+            var registry = services.AddPolicyRegistry();
+
+            registry.Add("RetryPolicy", PolicyRepository.RetryPolicy());
+            registry.Add("CircuitBreakerPolicy", PolicyRepository.CircuitBreakerPolicy());
+
+            var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("Nothing"),
+                })
+                .Verifiable();
+
+            services.AddHttpClient<ISampleTestService, SampleTestService>((serviceCollection, client) =>
+                {
+                    client.BaseAddress = new Uri("http://gonowhere.com");
+                    client.Timeout = new TimeSpan(10000);
+                })
+                .ConfigurePrimaryHttpMessageHandler(sp => handlerMock.Object)
+                .AddPolicyHandlerFromRegistry("RetryPolicy")
+                .AddPolicyHandlerFromRegistry("CircuitBreakerPolicy");
+
+        }
     }
 }
